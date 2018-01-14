@@ -12,7 +12,7 @@
       margin: 0;
     }
 
-    * {
+    *, *:before {
       position: relative;
       box-sizing: border-box;
     }
@@ -23,6 +23,7 @@
       flex-wrap: wrap;
       justify-content: flex-start;
       align-content: flex-start;
+      background-color: #353535;
     }
 
     [data-xviz-id] {
@@ -34,9 +35,15 @@
       font-family: sans-serif;
       font-size: 10px;
       padding: 1rem;
+      background-color: #4C4C4C;
     }
     [data-xviz-id]:before {
-      content: attr(data-xviz-id)
+      content: attr(data-xviz-id);
+      display: block;
+      width: 100%;
+      background-color: #5E5E5E;
+      color: white;
+      padding: .5rem;
     }
     [data-xviz-handle] {
       position: absolute;
@@ -44,7 +51,8 @@
       left: 50%;
       width: 10px;
       height: 10px;
-      outline: 2px solid red;
+      border-radius: 50%;
+      background-color: #fff;
     }
   </style>
 </head>

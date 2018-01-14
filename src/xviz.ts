@@ -1,54 +1,10 @@
-export namespace XViz {
-  export interface Position2D {
-    top: number
-    left: number
-  }
-  export interface Bounds extends Position2D {
-    height: number
-    width: number
-  }
-
-  export enum Side {
-    Top,
-    Right,
-    Bottom,
-    Left
-  }
-
-  export interface Handle {
-    type: 'input' | 'output'
-    side: Side
-    id: string
-  }
-
-  export interface NodeConfig {
-    id: string
-    data?: any
-  }
-
-  export interface Node extends NodeConfig {
-    bounds: Bounds
-    handles: Handle[]
-  }
-
-  export interface EdgeConfig {
-    id?: string
-    source: string
-    target: string
-    data?: any
-  }
-
-  export interface GraphConfig {
-    selector?: (parentElement: Element) => Element[]
-    parent?: Element
-    // renderNode: (node: GraphNode) => Element;
-    // renderEdge: (edge: GraphEdge) => Element;
-    // renderGraph: (nodeElements: Element[], edgeElements: Element[]) => Element;
-  }
-}
-
 import { Machine, StateNode } from 'xstate'
 import * as utils from 'xstate/lib/graph'
+import { Graph } from './Graph'
+import { EdgeEndpoints } from './module'
+import interact, { InteractEvent } from 'interactjs'
+
+console.log(interact)
 
 const pedestrianStates = {
   initial: 'walk',
@@ -115,120 +71,130 @@ function renderStates(state: StateNode): string {
 
 console.log(renderStates(lightMachine))
 
-document.write(renderStates(lightMachine))
+document.write(`<section>${renderStates(lightMachine)}</section>`)
+
+setTimeout(() => {
+  function dragMoveListener(event: InteractEvent) {
+    const target: HTMLElement = event.target
+    // keep the dragged position in the data-x/data-y attributes
+    const x = (parseFloat(target.getAttribute('data-x')!) || 0) + event.dx
+    const y = (parseFloat(target.getAttribute('data-y')!) || 0) + event.dy
+
+    // translate the element
+    target.style.webkitTransform = target.style.transform = 'translate(' + x + 'px, ' + y + 'px)'
+
+    // update the posiion attributes
+    target.setAttribute('data-x', x + '')
+    target.setAttribute('data-y', y + '')
+    // g.update();
+  }
+
+  interact('[data-xviz-id]').draggable({
+    // enable inertial throwing
+    inertia: true,
+    // keep the element within the area of it's parent
+    restrict: {
+      restriction: 'parent',
+      endOnly: true,
+      elementRect: { top: 0, left: 0, bottom: 1, right: 1 }
+    },
+    // enable autoScroll
+    autoScroll: true,
+
+    // call this function on every dragmove event
+    onmove: dragMoveListener,
+    // call this function on every dragend event
+    onend: function(event) {
+      const { target } = event
+      const textEl = event.target.querySelector('p')
+
+      textEl &&
+        (textEl.textContent =
+          'moved a distance of ' +
+          Math.sqrt(
+            (Math.pow(event.pageX - event.x0, 2) + Math.pow(event.pageY - event.y0, 2)) | 0
+          ).toFixed(2) +
+          'px')
+
+      g.update()
+    }
+  })
+})
+
+const bottom = (bounds: XViz.Bounds): number => bounds.top + bounds.height
+const right = (bounds: XViz.Bounds): number => bounds.left + bounds.width
+const distance = ([x1, y1]: XViz.Position2D, [x2, y2]: XViz.Position2D): number =>
+  Math.hypot(x1 - x2, y1 - y2)
+const center = (rect: XViz.Bounds): XViz.Position2D => [
+  rect.left + rect.width / 2,
+  rect.top + rect.height / 2
+]
+
+function shortestEndpoints(
+  sourceBounds: XViz.Bounds,
+  targetBounds: XViz.Bounds
+): [XViz.Position2D, XViz.Position2D] {
+  const [x1, y1] = center(sourceBounds)
+  const [x2, y2] = center(targetBounds)
+  return [[x1, y1], [x2, y2]]
+  // const radialAngle1 = Math.atan(sourceBounds.width / sourceBounds.height);
+  // const radialAngle2 = Math.atan(targetBounds.height / targetBounds.width);
+  // const theta1 = Math.atan(Math.abs(x1 - x2) / Math.abs(y1 - y2));
+  // const theta2 = Math.atan(Math.abs(y1 - y2) / Math.abs(x1 - x2));
+  // const m = (y2 - y1) / (x2 - x1);
+  // // tslint:disable-next-line:one-variable-per-declaration
+  // let ex1, ex2, ey1, ey2;
+
+  // if (radialAngle1 > theta1) {
+  //   ey1 = y1 < y2 ? bottom(sourceBounds) : sourceBounds.top;
+  //   // ex1 = x1 === x2 ? x1 : x1 - sourceBounds.height / 2 * Math.tan(theta1);
+  //   ex1 = m ? (bottom(sourceBounds) + sourceBounds.height / 2) / m + x1 : x1;
+  // } else {
+  //   // ey1 = y1 === y2 ? y1 : y1 + sourceBounds.width / 2 * Math.tan(theta1);
+  //   ey1 = m ? (right(sourceBounds) + sourceBounds.width / 2) / m + y1 : y1;
+  //   ex1 = x1 < x2 ? right(sourceBounds) : sourceBounds.left;
+  // }
+
+  // if (radialAngle2 > theta2) {
+  //   ex2 = x2 > x1 ? targetBounds.left : right(targetBounds);
+  //   ey2 = y2 === y1 ? y2 : y2 + targetBounds.width / 2 * Math.tan(theta2);
+  // } else {
+  //   ey2 = y2 > y1 ? targetBounds.top : bottom(targetBounds);
+  //   ex2 = x2 === x1 ? x2 : x2 + targetBounds.height / 2 * Math.tan(theta2);
+  // }
+
+  // console.log(ex1, ey1, ex2, ey2, theta1, theta2);
+
+  // return [[ex1, ey1], [ex2, ey2]];
+}
 
 export class GraphNode {
   public id: string
+  public inEdges: GraphEdge[] = []
+  public outEdges: GraphEdge[] = []
 
   constructor(
     config: XViz.NodeConfig,
     public bounds: XViz.Bounds,
-    public handles: XViz.Position2D[]
+    public handles: Record<string, XViz.Bounds>
   ) {
     this.id = config.id
-    if (!this.handles.length) {
-      this.handles = [center(bounds)]
-    }
+  }
+
+  get endpoints() {
+    return this.outEdges.map(edge => ({
+      edge,
+      endpoints: shortestEndpoints(this.bounds, edge.target.bounds)
+    }))
   }
 }
 
 export class GraphEdge {
   public bounds: XViz.Bounds
 
-  constructor(
-    public config: XViz.EdgeConfig,
-    public sourcePos: XViz.Position2D,
-    public targetPos: XViz.Position2D
-  ) {
-    this.bounds = boundsFromPositions(sourcePos, targetPos)
-  }
-}
-
-const selector = (parentElement: Element): Element[] => {
-  const elements = parentElement.querySelectorAll(`[data-xviz-id]`)
-  return Array.from(elements)
-}
-
-const relativeBounds = (parentRect: XViz.Bounds, childRect: XViz.Bounds): XViz.Bounds => ({
-  top: childRect.top - parentRect.top,
-  left: childRect.left - parentRect.left,
-  width: childRect.width,
-  height: childRect.height
-})
-
-const center = (rect: XViz.Bounds): XViz.Position2D => ({
-  top: rect.top + rect.height / 2,
-  left: rect.left + rect.width / 2
-})
-
-const boundsFromPositions = (posA: XViz.Position2D, posB: XViz.Position2D): XViz.Bounds => ({
-  left: Math.min(posA.left, posB.left),
-  top: Math.min(posA.top, posB.top),
-  width: Math.abs(posA.left - posB.left),
-  height: Math.abs(posA.top - posB.top)
-})
-
-export class Graph {
-  public selector: (parentElement: Element) => Element[]
-  public parent: Element
-  public bounds: XViz.Bounds
-  public nodes: Record<string, GraphNode> = {}
-  public edges: GraphEdge[]
-
-  constructor(public config: XViz.GraphConfig, edges: XViz.EdgeConfig[]) {
-    this.selector = config.selector || selector
-    this.parent = config.parent || document.body
-
-    const elements = this.selector(this.parent)
-    this.bounds = this.parent.getBoundingClientRect()
-
-    elements.forEach(element => {
-      const id = element.getAttribute('data-xviz-id') as string
-      const node = new GraphNode(
-        { id },
-        relativeBounds(this.bounds, element.getBoundingClientRect()),
-        Array.from(element.children)
-          .filter(child => child.matches(' [data-xviz-handle]'))
-          .map(handleElement =>
-            center(relativeBounds(this.bounds, handleElement.getBoundingClientRect()))
-          )
-      )
-      this.nodes[id] = node
-    })
-
-    this.edges = edges.map(edge => {
-      return new GraphEdge(
-        edge,
-        this.nodes[edge.source].handles[0],
-        this.nodes[edge.target].handles[0]
-      )
-    })
-
-    console.log(this.nodes, this.edges)
-  }
-
-  // update(elements: Element[]): void {}
-  render(): void {
-    const { edges } = this
-    const els = edges.map(edge => {
-      const str = `
-
-      <path stroke-width="2" stroke="blue" fill="none" d="M${edge.sourcePos.left},${
-        edge.sourcePos.top
-      } C${edge.sourcePos.left + 100},${edge.sourcePos.top} ${edge.targetPos.left - 100},${
-        edge.targetPos.top
-      } ${edge.targetPos.left},${edge.targetPos.top}"></path>
-      `.trim()
-      return str
-    })
-
-    this.parent.innerHTML += `<svg style="position:absolute;top:0;left:0;"width="100%" height="100%" viewBox="0 0 ${
-      this.bounds.width
-    } ${this.bounds.height}"
-    xmlns="http://www.w3.org/2000/svg">
-    ${els.join('\n')}
-    </svg>
-    `
+  constructor(public source: GraphNode, public target: GraphNode, public config?: any) {
+    source.outEdges.push(this)
+    target.inEdges.push(this)
   }
 }
 
