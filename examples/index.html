@@ -1,62 +1,35 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>Document</title>
   <style>
-    html, body {
+    * {
+      box-sizing: border-box;
+      position: relative;
+    }
+
+    html,
+    body {
       height: 100%;
       width: 100%;
       margin: 0;
     }
 
-    *, *:before {
-      position: relative;
-      box-sizing: border-box;
-    }
-
-    body {
-      display: flex;
-      flex-direction: row;
-      flex-wrap: wrap;
-      justify-content: flex-start;
-      align-content: flex-start;
-      background-color: #353535;
-    }
-
-    [data-xviz-id] {
-      display: inline-block;
-      margin: 1rem;
-      flex: 0 1 auto;
-      border: 2px solid black;
-      border-radius: .5rem;
-      font-family: sans-serif;
-      font-size: 10px;
-      padding: 1rem;
-      background-color: #4C4C4C;
-    }
-    [data-xviz-id]:before {
-      content: attr(data-xviz-id);
-      display: block;
-      width: 100%;
-      background-color: #5E5E5E;
-      color: white;
-      padding: .5rem;
-    }
-    [data-xviz-handle] {
-      position: absolute;
-      top: 0;
-      left: 50%;
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      background-color: #fff;
+    #cy {
+      width: 100vw;
+      height: 100vh;
+      flex-grow: 1;
     }
   </style>
 </head>
+
 <body>
+  <div id="cy"></div>
   <script src="../dist/xviz.umd.js"></script>
 </body>
+
 </html>
