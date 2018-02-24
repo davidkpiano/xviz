@@ -21,7 +21,10 @@ export function render(nodes, edges) {
       {
         selector: 'node',
         style: {
-          'background-color': 'white'
+          'background-color': 'white',
+          'transition-property': 'color, background-color',
+          'transition-duration': '.4s',
+          'transition-timing-function': 'ease-out-sine'
         }
       },
       {
@@ -48,7 +51,7 @@ export function render(nodes, edges) {
         }
       },
       {
-        selector: `node[?parallel]`,
+        selector: `node[?parallel] > node`,
         style: {
           'border-style': 'dashed'
         }
@@ -129,29 +132,20 @@ export function render(nodes, edges) {
         }
       },
       {
-        selector: 'node.action',
+        selector: 'node.active',
         style: {
-          label: 'data(label)',
-          'text-valign': 'center',
-          'text-halign': 'right',
-          shape: 'rectangle',
-          'padding-left': 0,
-          'padding-right': 0,
-          'padding-top': 0,
-          'padding-bottom': 0,
-          'border-width': 0,
-          'text-margin-x': node => node.boundingBox({ includeLabels: false }).w * -1,
-          'font-weight': 'normal'
+          'background-color': 'blue',
+          'border-color': 'blue',
+          color: 'white'
+        }
+      },
+      {
+        selector: 'edge.active',
+        style: {
+          'line-color': 'blue',
+          color: 'blue'
         }
       }
-      // {
-      //   selector: 'node.action.entry',
-      //   style: { color: 'green' }
-      // },
-      // {
-      //   selector: 'node.action.exit',
-      //   style: { color: 'red' }
-      // }
     ],
 
     elements: {

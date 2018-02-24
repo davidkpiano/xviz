@@ -1,81 +1,52 @@
-import { Machine } from 'xstate'
+import { Machine, StateNode, State } from 'xstate'
 import * as utils from 'xstate/lib/graph'
 import { render } from './cy.js'
+import { EventObject, StateValue } from '../../xstate/lib/types.js'
+
+const lightMachineConfig = {
+  initial: 'green',
+  states: {
+    green: {
+      on: {
+        TIMER: 'yellow',
+        EMERGENCY: 'yellow'
+      }
+    },
+    yellow: {
+      on: {
+        TIMER: 'red'
+      }
+    },
+    red: {
+      on: {
+        TIMER: 'green'
+      },
+      onEntry: 'startCountdown',
+      onExit: 'stopCountdown',
+      initial: 'walk',
+      states: {
+        walk: {
+          on: {
+            PED_TIMER: 'wait'
+          }
+        },
+        wait: {
+          on: {
+            PED_TIMER: 'stop'
+          }
+        },
+        stop: {}
+      }
+    }
+  }
+}
 
 const config = {
   key: 'light',
   parallel: true,
   states: {
-    ns: {
-      initial: 'green',
-      states: {
-        green: {
-          on: {
-            TIMER: 'yellow'
-          }
-        },
-        yellow: {
-          on: {
-            TIMER: 'red'
-          }
-        },
-        red: {
-          on: {
-            TIMER: 'green'
-          },
-          onEntry: 'startCountdown',
-          onExit: 'stopCountdown',
-          initial: 'walk',
-          states: {
-            walk: {
-              on: {
-                PED_TIMER: 'wait'
-              }
-            },
-            wait: {
-              on: {
-                PED_TIMER: 'stop'
-              }
-            },
-            stop: {}
-          }
-        }
-      }
-    },
-    ew: {
-      initial: 'green',
-      states: {
-        green: {
-          on: {
-            TIMER: 'yellow'
-          }
-        },
-        yellow: {
-          on: {
-            TIMER: 'red'
-          }
-        },
-        red: {
-          on: {
-            TIMER: 'green'
-          },
-          initial: 'walk',
-          states: {
-            walk: {
-              on: {
-                PED_TIMER: 'wait'
-              }
-            },
-            wait: {
-              on: {
-                PED_TIMER: 'stop'
-              }
-            },
-            stop: {}
-          }
-        }
-      }
-    }
+    ns: lightMachineConfig,
+    ew: lightMachineConfig
   }
 }
 
@@ -140,25 +111,12 @@ const nodes = utils
         ? {
             data: {
               id: node.id + ':actions',
+              label: entryLabel + exitLabel,
               parent: node.id
             },
             classes: 'actions'
           }
-        : false,
-      node.onEntry && {
-        data: {
-          label: entryLabel,
-          parent: node.id + ':actions'
-        },
-        classes: 'entry action'
-      },
-      node.onExit && {
-        data: {
-          label: exitLabel,
-          parent: node.id + ':actions'
-        },
-        classes: 'exit action'
-      }
+        : false
     ]
   })
   .reduce((a, b) => a.concat(b), [])
@@ -172,10 +130,10 @@ const nodes = utils
   })
 const edges: any[] = utils.getEdges(machine).map(edge => ({
   data: {
-    id: `${edge.source.id}:${edge.target.id}`,
+    id: `${edge.source.id}:${edge.target.id}::${edge.event}`,
     source: edge.source.id,
     target: edge.target.id,
-    label: edge.event
+    label: edge.event + edge.cond
   }
 }))
 console.log(
@@ -186,8 +144,7 @@ console.log(
             data: {
               id: `${node.id}:initial`,
               source: `${node.id}:initial`,
-              target: `${node.id}.${node.initial}`,
-              label: 'yea'
+              target: `${node.id}.${node.initial}`
             }
           }
         : false
@@ -209,5 +166,66 @@ edges.push(
     )
     .filter(Boolean)
 )
+const cy = render(nodes, edges)
 
-;(window as any).cy = render(nodes, edges)
+;(window as any).cy = cy
+
+console.log(cy.nodes().positions(() => true))
+
+function getIds(stateValue: StateValue): string[] {
+  if (typeof stateValue === 'string') return [stateValue]
+
+  return Object.keys(stateValue)
+    .map(key => {
+      return getIds(stateValue[key]).map(id => key + '.' + id)
+    })
+    .reduce((a, b) => a.concat(b), [])
+}
+
+class Interpreter {
+  state: State
+
+  constructor(public machine: StateNode) {
+    this.state = machine.initialState
+  }
+
+  public send(event: EventObject): State {
+    const prevState = this.state
+    this.state = this.machine.transition(prevState, event)
+
+    cy.$('.active').removeClass('active')
+
+    const prevIds = getIds(prevState.value).map(id => `${this.machine.id}.${id}`)
+    const nextIds = getIds(this.state.value).map(id => `${this.machine.id}.${id}`)
+
+    nextIds.forEach(id => {
+      cy.getElementById(id).addClass('active')
+
+      // prevIds.forEach(prevId => {
+      //   console.log(`${prevId}:${id}::${event}`);
+      //   cy.getElementById(`${prevId}:${id}::initial`).addClass('active');
+      //   cy.getElementById(`${prevId}:${id}::${event}`).addClass('active');
+      // });
+    })
+
+    return this.state
+  }
+}
+
+;(window as any).interpreter = new Interpreter(machine)
+
+const state = ((window as any).state = {
+  selected: new Set<string>()
+})
+
+cy.on('tap', 'node', (e: cytoscape.EventObject) => {
+  console.log(e.target.id())
+  state.selected.add(e.target.id())
+  e.target.addClass('active')
+})
+
+cy.on('tap', 'edge', (e: cytoscape.EventObject) => {
+  console.log(e.target.id())
+  state.selected.add(e.target.id())
+  e.target.addClass('active')
+})
