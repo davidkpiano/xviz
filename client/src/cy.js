@@ -17,7 +17,7 @@ export function render(element, nodes, edges) {
 
     style: [
       {
-        selector: `core`,
+        selector: 'core',
         style: {
           'active-bg-color': colors.highlight,
           'selection-box-color': colors.highlight
@@ -33,9 +33,9 @@ export function render(element, nodes, edges) {
         }
       },
       {
-        selector: `node[label != '$initial']`,
+        selector: "node[label != '$initial']",
         style: {
-          content: ele => {
+          content: function(ele) {
             return ele.data('label');
           },
           'text-wrap': 'wrap',
@@ -56,13 +56,13 @@ export function render(element, nodes, edges) {
         }
       },
       {
-        selector: `node[?parallel] > node`,
+        selector: 'node[?parallel] > node',
         style: {
           'border-style': 'dashed'
         }
       },
       {
-        selector: `node:active`,
+        selector: 'node:active',
         style: {
           'overlay-color': colors.text,
           'overlay-padding': '0',
@@ -70,7 +70,7 @@ export function render(element, nodes, edges) {
         }
       },
       {
-        selector: `node[?initial]`,
+        selector: 'node[?initial]',
         style: {
           content: '',
           width: '5px',
@@ -84,7 +84,7 @@ export function render(element, nodes, edges) {
         }
       },
       {
-        selector: `$node > node`,
+        selector: '$node > node',
         style: {
           'padding-top': '1px',
           'padding-left': '10px',
@@ -102,7 +102,7 @@ export function render(element, nodes, edges) {
         }
       },
       {
-        selector: `edge`,
+        selector: 'edge',
         style: {
           'curve-style': 'bezier',
           width: '1px',
@@ -122,7 +122,7 @@ export function render(element, nodes, edges) {
         }
       },
       {
-        selector: `edge.initial`,
+        selector: 'edge.initial',
         style: {
           'source-arrow-shape': 'circle',
           'source-arrow-color': colors.text
@@ -175,8 +175,8 @@ export function render(element, nodes, edges) {
     ],
 
     elements: {
-      nodes,
-      edges
+      nodes: nodes,
+      edges: edges
     },
 
     layout: {
