@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { EventType } from '../../../xstate/lib/types';
+import { EventType } from 'xstate/lib/types';
 
 interface EventButtonProps {
   name: EventType;
