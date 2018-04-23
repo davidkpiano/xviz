@@ -7,7 +7,7 @@ import { UnControlled as CodeMirror } from 'react-codemirror2';
 import { Machine, StateNode, State } from 'xstate';
 import * as utils from 'xstate/lib/graph';
 import { render } from './cy.js';
-import { StateValue, EventObject, EventType, Action } from '../../../xstate/lib/types';
+import { StateValue, EventObject, EventType, Action } from 'xstate/lib/types';
 import { Field } from './Field';
 import { EventButton } from './EventButton';
 import * as cn from 'classnames';
