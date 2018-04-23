@@ -3,9 +3,14 @@ import coseBilkent from 'cytoscape-cose-bilkent';
 
 cytoscape.use(coseBilkent);
 
-export function render(nodes, edges) {
+const colors = {
+  text: '#222',
+  highlight: '#129BE6'
+};
+
+export function render(element, nodes, edges) {
   return cytoscape({
-    container: document.querySelector('#cy'),
+    container: element,
 
     boxSelectionEnabled: true,
     autounselectify: true,
@@ -14,8 +19,8 @@ export function render(nodes, edges) {
       {
         selector: `core`,
         style: {
-          'active-bg-color': 'blue',
-          'selection-box-color': 'blue'
+          'active-bg-color': colors.highlight,
+          'selection-box-color': colors.highlight
         }
       },
       {
@@ -47,7 +52,7 @@ export function render(nodes, edges) {
           'padding-top': '5px',
           'padding-bottom': '5px',
           'border-width': '1px',
-          'border-color': 'black'
+          'border-color': colors.text
         }
       },
       {
@@ -59,7 +64,7 @@ export function render(nodes, edges) {
       {
         selector: `node:active`,
         style: {
-          'overlay-color': 'black',
+          'overlay-color': colors.text,
           'overlay-padding': '0',
           'overlay-opacity': '0.1'
         }
@@ -75,7 +80,7 @@ export function render(nodes, edges) {
           'padding-top': 0,
           'padding-bottom': 0,
           shape: 'ellipse',
-          'background-color': 'black'
+          'background-color': colors.text
         }
       },
       {
@@ -86,7 +91,7 @@ export function render(nodes, edges) {
           'padding-bottom': '10px',
           'padding-right': '10px',
           'border-width': '1px',
-          'border-color': 'black'
+          'border-color': colors.text
         }
       },
       {
@@ -107,8 +112,8 @@ export function render(nodes, edges) {
           'font-weight': 'bold',
           'text-background-color': '#fff',
           'text-background-padding': '3px',
-          'line-color': 'black',
-          'target-arrow-color': 'black',
+          'line-color': colors.text,
+          'target-arrow-color': colors.text,
           'z-index': '100',
           'text-wrap': 'wrap',
           'text-background-color': 'white',
@@ -120,30 +125,51 @@ export function render(nodes, edges) {
         selector: `edge.initial`,
         style: {
           'source-arrow-shape': 'circle',
-          'source-arrow-color': 'black'
+          'source-arrow-color': colors.text
         }
       },
       {
         selector: 'node.actions',
         style: {
           'border-width': 0,
+          'background-color': 'white',
           padding: 0,
-          'compound-sizing-wrt-labels': 'include'
+          'compound-sizing-wrt-labels': 'include',
+          'font-size': '5px'
         }
       },
       {
         selector: 'node.active',
         style: {
-          'background-color': 'blue',
-          'border-color': 'blue',
+          'background-color': colors.highlight,
+          'border-color': colors.highlight
+        }
+      },
+      {
+        selector: 'node.active:childless',
+        style: {
           color: 'white'
         }
       },
       {
-        selector: 'edge.active',
+        selector: 'node.highlight',
         style: {
-          'line-color': 'blue',
-          color: 'blue'
+          'border-color': colors.highlight
+        }
+      },
+      {
+        selector: 'node.active > node.actions',
+        style: {
+          'background-color': colors.highlight,
+          color: 'white'
+        }
+      },
+      {
+        selector: 'edge.highlight',
+        style: {
+          'line-color': colors.highlight,
+          'target-arrow-color': colors.highlight,
+          color: colors.highlight
         }
       }
     ],

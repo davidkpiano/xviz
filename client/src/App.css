@@ -1,0 +1,158 @@
+/* @import  */
+
+
+* {
+  box-sizing: border-box;
+  position: relative;
+}
+
+:root {
+  --color-primary: #129BE6;
+}
+
+html,
+body {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  font-size: 14px;
+}
+
+.ui-app {
+  width: 100vw;
+  height: 100vh;
+  display: grid;
+  grid-template-columns: 1fr 30vw;
+}
+
+.ui-panels {
+  grid-column: 2 / 3;
+  display: grid;
+  grid-template-rows: 3rem 1fr;
+  background-color: #252526;
+  color: white;
+}
+
+.ui-tabs {
+  grid-row: 1 / 2;
+  width: 100%;
+  display: flex;
+  justify-content: stretch;
+}
+
+.ui-tab {
+  --border-color: transparent;
+  padding: .5rem;
+  border: none;
+  border-bottom: .25rem solid var(--border-color);
+  color: white;
+  text-transform: uppercase;
+  appearance: none;
+  background-color: transparent;
+  flex-grow: 1;
+  cursor: pointer;
+}
+
+.ui-tab.-visible {
+  --border-color: var(--color-primary);
+}
+
+.ui-tab:focus {
+  outline: none;
+}
+
+.ui-panel {
+  grid-row: 2 / 3;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: stretch;
+}
+
+.ui-field {
+  margin-bottom: 1rem;
+  padding: 1rem;
+}
+
+.ui-label {
+  font-size: .75rem;
+  text-transform: uppercase;
+  font-weight: bold;
+  color: rgba(255, 255, 255, 0.6);
+  display: block;
+  margin-bottom: .5rem;
+}
+
+.ui-button {
+  appearance: none;
+  -webkit-appearance: none;
+  border: none;
+  border-radius: 2rem;
+  color: white;
+  padding: .5rem 1rem;
+  margin-bottom: 0.25rem;
+  display: block;
+  cursor: pointer;
+}
+
+.ui-button.-save {
+  background-color: #F09031;
+  max-width: 100%;
+  width: calc(100% - 2rem);
+  margin: 1rem;
+}
+
+.ui-button.-event {
+  display: inline-block;
+  margin-right: 0.25rem;
+  background-color: var(--color-primary);
+}
+
+.ui-button[disabled] {
+  opacity: .5;
+}
+
+.ui-codemirror-container {
+  grid-column: 1 / 2;
+}
+
+.ui-editor {
+  flex-grow: 1;
+}
+
+.ui-codemirror,
+#cy {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+pre {
+  margin: 0;
+}
+
+ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+
+.ui-viz {
+  grid-column: 1 / 2;
+}
+
+.ui-editor[data-state="closed"] #cy {
+  display: block;
+}
+.ui-editor[data-state="open"] .ui-codemirror {
+  display: block;
+}
+.react-codemirror2 {
+  height: 80vh;
+}
+.CodeMirror {
+  height: 100% !important;
+}
