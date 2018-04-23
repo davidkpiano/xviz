@@ -10,8 +10,19 @@ import { render } from './cy.js';
 import { StateValue, EventObject, EventType, Action } from '../../../xstate/lib/types';
 import { Field } from './Field';
 import { EventButton } from './EventButton';
-import * as queryString from 'query-string';
 import * as cn from 'classnames';
+
+function getQueryVariable(variable: string): string | undefined {
+  var query = window.location.search.substring(1);
+  var vars = query.split('&');
+  for (var i = 0; i < vars.length; i++) {
+    var pair = vars[i].split('=');
+    if (decodeURIComponent(pair[0]) === variable) {
+      return decodeURIComponent(pair[1]);
+    }
+  }
+  return undefined;
+}
 
 const galleryMachine = Machine({
   initial: 'start',
@@ -124,7 +135,7 @@ class App extends React.Component<{}, AppState> {
   constructor(props: {}) {
     super(props);
 
-    let { machine: rawMachine } = queryString.parse(location.search);
+    let rawMachine = getQueryVariable('machine');
     rawMachine = rawMachine
       ? JSON.stringify(JSON.parse(rawMachine), null, 2)
       : JSON.stringify(galleryMachine.config, null, 2);
