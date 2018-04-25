@@ -86,6 +86,17 @@ body {
   margin-bottom: .5rem;
 }
 
+.ui-action {
+  appearance: none;
+  background-color: #DD5044;
+  color: white;
+  padding: .25rem;
+  display: inline-block;
+  margin-left: .5rem;
+  border: none;
+  border-radius: 3px;
+}
+
 .ui-button {
   appearance: none;
   -webkit-appearance: none;

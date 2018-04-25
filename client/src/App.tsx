@@ -11,64 +11,19 @@ import { StateValue, EventObject, EventType, Action } from 'xstate/lib/types';
 import { Field } from './Field';
 import { EventButton } from './EventButton';
 import * as cn from 'classnames';
+import { galleryMachine } from './fixtures';
 
 function getQueryVariable(variable: string): string | undefined {
-  var query = window.location.search.substring(1);
-  var vars = query.split('&');
-  for (var i = 0; i < vars.length; i++) {
-    var pair = vars[i].split('=');
+  const query = window.location.search.substring(1);
+  const vars = query.split('&');
+  for (let i = 0; i < vars.length; i++) {
+    const pair = vars[i].split('=');
     if (decodeURIComponent(pair[0]) === variable) {
       return decodeURIComponent(pair[1]);
     }
   }
   return undefined;
 }
-
-const galleryMachine = Machine({
-  initial: 'start',
-  states: {
-    start: {
-      on: {
-        SEARCH: {
-          loading: {
-            cond: function canDo() {
-              return true;
-            }
-          }
-        }
-      }
-    },
-    loading: {
-      onEntry: ['search'],
-      on: {
-        SEARCH_SUCCESS: {
-          gallery: {
-            actions: ['updateItems']
-          }
-        },
-        SEARCH_FAILURE: 'error',
-        CANCEL_SEARCH: 'gallery'
-      }
-    },
-    error: {
-      on: {
-        SEARCH: 'loading'
-      }
-    },
-    gallery: {
-      on: {
-        SEARCH: 'loading',
-        SELECT_PHOTO: 'photo'
-      }
-    },
-    photo: {
-      onEntry: ['setPhoto'],
-      on: {
-        EXIT_PHOTO: 'gallery'
-      }
-    }
-  }
-});
 
 function getIds(stateValue: StateValue): string[] {
   if (typeof stateValue === 'string') {
@@ -114,8 +69,11 @@ class Interpreter {
 
   public send(event: EventObject | EventType): State {
     const prevState = this.state;
-    console.log(prevState, event);
     return this.setState(this.machine.transition(prevState, event));
+  }
+
+  public reset() {
+    this.setState(this.machine.initialState);
   }
 }
 
@@ -280,6 +238,28 @@ class App extends React.Component<{}, AppState> {
   handleEventMouseOut(eventType: EventType): void {
     this.cy.$(`.highlight`).removeClass('highlight');
   }
+  handleReset() {
+    this.interpreter.reset();
+    this.setState({
+      currentState: this.interpreter.state
+    });
+  }
+  handleSave() {
+    const { editorValue } = this.state;
+    try {
+      // tslint:disable-next-line:no-eval
+      const machineConfig = eval('var tmp = ' + editorValue + '; tmp');
+
+      // test if it's a valid machine
+      Machine(machineConfig);
+
+      window.location.href = `${location.pathname}?machine=${encodeURIComponent(
+        JSON.stringify(machineConfig)
+      )}`;
+    } catch (e) {
+      window.alert('Invalid machine config. Please check it and try again.');
+    }
+  }
   renderEditor() {
     return (
       <div className="ui-editor">
@@ -297,18 +277,7 @@ class App extends React.Component<{}, AppState> {
             });
           }}
         />
-        <button
-          className="ui-button -save"
-          onClick={() => {
-            const { editorValue } = this.state;
-
-            // tslint:disable-next-line:no-eval
-            window.location.href = `${location.pathname}?machine=${encodeURIComponent(
-              // tslint:disable-next-line:no-eval
-              JSON.stringify(eval('var tmp = ' + editorValue + '; tmp'))
-            )}`;
-          }}
-        >
+        <button className="ui-button -save" onClick={() => this.handleSave()}>
           Save (reload)
         </button>
       </div>
@@ -360,7 +329,10 @@ class App extends React.Component<{}, AppState> {
                 );
               })}
             </Field>
-            <Field label="Current state">
+            <Field
+              label="Current state"
+              action={{ title: 'Reset', onClick: () => this.handleReset() }}
+            >
               <pre>{JSON.stringify(currentState.value, null, 2)}</pre>
             </Field>
             <Field label="Actions">

@@ -9,7 +9,7 @@ const colors = {
 };
 
 export function render(element, nodes, edges) {
-  return cytoscape({
+  const cy = cytoscape({
     container: element,
 
     boxSelectionEnabled: true,
@@ -111,7 +111,7 @@ export function render(element, nodes, edges) {
           'font-size': '5px',
           'font-weight': 'bold',
           'text-background-color': '#fff',
-          'text-background-padding': '3px',
+          'text-background-padding': '1px',
           'line-color': colors.text,
           'target-arrow-color': colors.text,
           'z-index': '100',
@@ -191,4 +191,12 @@ export function render(element, nodes, edges) {
       nodeDimensionsIncludeLabels: true
     }
   });
+
+  cy.on('tap', 'node', function(event) {
+    const node = event.target;
+
+    cy.center(node);
+  });
+
+  return cy;
 }
