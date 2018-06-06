@@ -132,8 +132,8 @@ class App extends React.Component<{}, AppState> {
 
     const graphNodes = [machine, ...nodes]
       .map(node => {
-        const entryLabel = node.onEntry ? `\nentry / ${node.onEntry.join(',')}` : '';
-        const exitLabel = node.onExit ? `\nexit / ${node.onExit.join(',')}` : '';
+        const entryLabel = node.onEntry.length ? `\nentry / ${node.onEntry.join(',')}` : '';
+        const exitLabel = node.onExit.length ? `\nexit / ${node.onExit.join(',')}` : '';
         return [
           {
             data: {
@@ -151,7 +151,7 @@ class App extends React.Component<{}, AppState> {
               initial: true
             }
           },
-          node.onEntry || node.onExit
+          node.onEntry.length || node.onExit.length
             ? {
                 data: {
                   id: node.id + ':actions',
@@ -177,7 +177,9 @@ class App extends React.Component<{}, AppState> {
         event: edge.event,
         label:
           edge.event +
-          (edge.cond ? ` [${edge.cond.name || edge.cond.toString()}]` : '') +
+          (edge.cond
+            ? ` [${typeof edge.cond === 'function' ? edge.cond.name : edge.cond.toString()}]`
+            : '') +
           (edge.actions.length ? `\n / ${edge.actions.join(', ')}` : '')
       }
     }));
