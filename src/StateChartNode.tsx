@@ -21,7 +21,7 @@ const StyledState = styled.div`
   display: inline-block;
   border-radius: 0.25rem;
   text-align: left;
-  border: 2px solid #dedede;
+  border: 2px solid var(--color-border);
   margin: 0.5rem 1rem;
   flex-grow: 0;
   flex-shrink: 1;
@@ -56,7 +56,7 @@ const StyledState = styled.div`
   }
 
   &[data-active] {
-    border-color: #57b0ea;
+    border-color: var(--color-primary);
     --color-shadow: var(--color-primary-shadow);
     opacity: 1;
   }
@@ -218,6 +218,7 @@ export class StateChartNode extends React.Component<StateChartNodeProps> {
     return (
       <StyledState
         key={stateNode.id}
+        data-id={stateNode.id}
         data-type={dataType}
         data-active={isActive && stateNode.parent}
         data-preview={isPreview && stateNode.parent}
@@ -243,6 +244,7 @@ export class StateChartNode extends React.Component<StateChartNodeProps> {
                   onMouseOver={() => onPreEvent(ownEvent)}
                   onMouseOut={() => onExitPreEvent()}
                   disabled={disabled}
+                  data-id={`${stateNode.id}:${ownEvent}`}
                 >
                   {friendlyEventName(ownEvent)}
                 </StyledEventButton>
