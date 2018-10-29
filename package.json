@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "react": "^16.6.0",
+    "react-ace": "^6.2.0",
     "react-dom": "^16.6.0",
     "react-scripts": "next",
     "react-syntax-highlighter": "^9.0.1",

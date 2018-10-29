@@ -10,6 +10,7 @@
   --color-primary: rgba(87, 176, 234, 1);
   --color-primary-faded: rgba(87, 176, 234, 0.5);
   --color-primary-shadow: rgba(87, 176, 234, 0.1);
+  --color-link: rgba(87, 176, 234, 1);
   --radius: 0.2rem;
 }
 
@@ -40,4 +41,15 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+.app {
+  max-height: 100vh;
+  max-width: 100vw;
+  overflow: hidden;
+}
+
+:global * {
+  position: relative;
+  box-sizing: border-box;
 }
