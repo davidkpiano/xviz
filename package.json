@@ -9,11 +9,11 @@
   "files": [
     "dist"
   ],
-  "author": "David Khourshid <davidkpiano@gmail.com>",
   "repository": {
     "type": "git",
-    "url": ""
+    "url": "https://github.com/davidkpiano/xviz.git"
   },
+  "author": "David Khourshid <davidkpiano@gmail.com>",
   "license": "MIT",
   "engines": {
     "node": ">=6.0.0"
